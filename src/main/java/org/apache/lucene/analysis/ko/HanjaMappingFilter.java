@@ -163,7 +163,8 @@ public final class HanjaMappingFilter extends TokenFilter {
                     sb.append(chs[k]);
                     if(k>0)  candiList.add(sb);
                     
-                	Iterator<String[]> iter = DictionaryUtil.findWithPrefix(sb.toString());
+                	@SuppressWarnings("rawtypes")
+					Iterator iter = DictionaryUtil.findWithPrefix(sb.toString());
                     if(!iter.hasNext() && !removeList.contains(sb)) removeList.add(sb); // 사전에 없으면 삭제 후보
                 }
             }

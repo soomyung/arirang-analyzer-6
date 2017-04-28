@@ -17,39 +17,23 @@ package org.apache.lucene.analysis.ko;
  * limitations under the License.
  */
 
-import java.io.IOException;
 import java.io.Reader;
-import java.util.Arrays;
-import java.util.List;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.StopFilter;
-import org.apache.lucene.analysis.StopwordAnalyzerBase;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.ClassicFilter;
+
 
 /**
  * A Korean Analyzer
  */
-public class KoreanAnalyzer extends StopwordAnalyzerBase {
+public class KoreanAnalyzer extends Analyzer {
   
-  /** An unmodifiable set containing some common English words that are not usually useful
-  for searching.*/
-  public static final CharArraySet ENGLISH_STOP_WORDS_SET;
-  
-  static {
-    final List<String> stopWords = Arrays.asList(
-      "a", "an", "and", "are", "as", "at", "be", "but", "by",
-      "for", "if", "in", "into", "is", "it",
-      "no", "not", "of", "on", "or", "such",
-      "that", "the", "their", "then", "there", "these",
-      "they", "this", "to", "was", "will", "with"
-    );
-    final CharArraySet stopSet = new CharArraySet(stopWords, false);
-    ENGLISH_STOP_WORDS_SET = CharArraySet.unmodifiableSet(stopSet); 
-  }
-
+ private final CharArraySet stopWords;
+	  
   private boolean bigrammable = false;
     
   private boolean hasOrigin = false;
@@ -61,13 +45,11 @@ public class KoreanAnalyzer extends StopwordAnalyzerBase {
   private boolean decompound = true;
   
   public KoreanAnalyzer() {
-	  this(ENGLISH_STOP_WORDS_SET);
+	  stopWords = new CharArraySet(0, true);
   }
   
-  /** Builds an analyzer with the stop words from the given set.
-   * @param stopWords Set of stop words */
-  public KoreanAnalyzer(CharArraySet stopWords) {
-    super(stopWords);
+  public KoreanAnalyzer(String[] words, boolean ignoreCase) {
+	  stopWords = StopFilter.makeStopSet(words, ignoreCase);
   }
   
   @Override
@@ -79,8 +61,8 @@ public class KoreanAnalyzer extends StopwordAnalyzerBase {
     if(wordSegment) tok = new WordSegmentFilter(tok, hasOrigin);
     tok = new HanjaMappingFilter(tok);
     tok = new PunctuationDelimitFilter(tok);
-    tok = new StopFilter(tok, stopwords);
-    
+    tok = new StopFilter(tok, stopWords);
+
     return new TokenStreamComponents(src, tok) {
       @Override
       protected void setReader(final Reader reader)  {

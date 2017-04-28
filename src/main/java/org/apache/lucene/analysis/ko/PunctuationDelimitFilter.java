@@ -31,12 +31,17 @@ public final class PunctuationDelimitFilter extends TokenFilter {
 	
 	private int minTermSize = 1;
 	
+	private boolean processedToken = false;
+	
+	private int processedOffset = 0;
+	
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
     private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
     private final KeywordAttribute keywordAtt = addAttribute(KeywordAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
-    
+	private final MorphemeAttribute morphAtt = addAttribute(MorphemeAttribute.class);
+	
     /**
      * Construct a token stream filtering the given input.
      *
@@ -62,6 +67,7 @@ public final class PunctuationDelimitFilter extends TokenFilter {
     	this.minTermSize = size;
     }
     
+    private Token nextToken = null;
     @Override
     public boolean incrementToken() throws IOException {
 
@@ -73,11 +79,17 @@ public final class PunctuationDelimitFilter extends TokenFilter {
 
         while (input.incrementToken()) {
         	if (keywordAtt.isKeyword() || 
-        			KoreanTokenizer.TYPE_SIMBOL.equals(typeAtt.type())) return true;
-            if(!containPunctuation(termAtt.toString())) return true;
-
+        			KoreanTokenizer.TYPE_SIMBOL.equals(typeAtt.type())) 
+        		return true;
+        	
+            if((morphAtt.getToken()!=null && morphAtt.getToken().isCompound()) ||
+            		!containPunctuation(termAtt.toString())) return true;
+            
             splitByPunctuation(termAtt.toString());
-
+            
+            processedToken = true;
+            processedOffset = offsetAtt.startOffset();
+            
             if (!outQueue.isEmpty()) {
                 setAttributesFromQueue(true);
                 return true;
@@ -98,6 +110,8 @@ public final class PunctuationDelimitFilter extends TokenFilter {
         termAtt.setEmpty().append(iw.getTerm());
         offsetAtt.setOffset(iw.getOffset(), iw.getEndOffset());
         posIncrAtt.setPositionIncrement(iw.getIncrement());
+        
+        processedOffset = iw.getOffset();
     }
 
     private void splitByPunctuation(String term) {
@@ -195,6 +209,8 @@ public final class PunctuationDelimitFilter extends TokenFilter {
         super.reset();
         outQueue.clear();
         currentState = null;
+        processedToken = false;
+        nextToken = null;
     }
 
     private class Token {

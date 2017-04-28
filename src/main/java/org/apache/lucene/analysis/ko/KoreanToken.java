@@ -19,6 +19,8 @@ public class KoreanToken {
     private int posInc = 1;
 
     private int posLen = 1;
+    
+    private boolean isCompound = false;
 
     private boolean endWithPunctuation = false;
 
@@ -74,6 +76,14 @@ public class KoreanToken {
 
     public void setPosInc(int posInc) {
         this.posInc = posInc;
+    }
+    
+    public void setCompound(boolean is) {
+    	this.isCompound = is;
+    }
+    
+    public boolean isCompound() {
+    	return this.isCompound;
     }
 
     public boolean isEndWithPunctuation() {

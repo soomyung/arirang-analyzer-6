@@ -34,6 +34,7 @@ public class TestKoreanAnalyzer extends TestCase {
 //		input = "되었다";
 		input="홍재룡(洪在龍)이며";
 //		input="[2015/12/12] 일일감리보고서";
+//		input = "analyzer";
 		
 		KoreanAnalyzer a = new KoreanAnalyzer();
 		a.setHasOrigin(false);

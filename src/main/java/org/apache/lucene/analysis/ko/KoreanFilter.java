@@ -242,14 +242,20 @@ public final class KoreanFilter extends TokenFilter {
 					&& output.getSource().length() - 1 == output.getStem()
 							.length()) {
 				String source = removeSymbol(output.getSource());
-				map.put(position + ":" + source, new KoreanToken(source,
-						startoffset, inc));
+				
+				KoreanToken t = new KoreanToken(source, startoffset, inc);
+				t.setCompound(output.getCNounList().size()>1);
+
+				map.put(position + ":" + source, t);
 				// map.put(position+":"+output.getStem(), new
 				// KoreanToken(output.getStem(),startoffset,0));
 			} else {
 				String stem = removeSymbol(output.getStem());
-				map.put(position + ":" + stem, new KoreanToken(stem,
-						startoffset, inc));
+				
+				KoreanToken t = new KoreanToken(stem, startoffset, inc);
+				t.setCompound(output.getCNounList().size()>1);
+				
+				map.put(position + ":" + stem, t);
 			}
 
 			if (output.getStem().length() > maxStem)
@@ -274,6 +280,9 @@ public final class KoreanFilter extends TokenFilter {
 						continue;
 
 					CompoundEntry cEntry = output.getCNounList().get(i);
+					
+//			        if(queryMode && cEntry.getWord().length()<2) continue; // default parameter AND
+			          
 					int cStartoffset = getStartOffset(output, i) + startoffset;
 					int inc = i == 0 ? 0 : 1;
 					map.put((cPosition) + ":" + cEntry.getWord(),
